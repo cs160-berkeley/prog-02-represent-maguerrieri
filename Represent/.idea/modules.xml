@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/../../../../CS 160/prog/prog-02/Represent/Represent.iml" filepath="$PROJECT_DIR$/../../../../CS 160/prog/prog-02/Represent/Represent.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../../../CS 160/prog/prog-02/Represent/mobile/mobile.iml" filepath="$PROJECT_DIR$/../../../../CS 160/prog/prog-02/Represent/mobile/mobile.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../../../CS 160/prog/prog-02/Represent/wear/wear.iml" filepath="$PROJECT_DIR$/../../../../CS 160/prog/prog-02/Represent/wear/wear.iml" />
+    </modules>
+  </component>
+</project>
