@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Represent!</string>
     <string name="action_settings">Settings</string>
+    <string name="enter_zip">Enter your ZIP code</string>
+    <string name="use_loc">Or use your current location</string>
+    <string name="loc_desc">Discover your US representatives</string>
 </resources>
