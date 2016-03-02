@@ -4,4 +4,9 @@
     <color name="colorPrimaryDark">#1976d2</color>
     <color name="colorAccent">#f44336</color>
     <color name="transparent">#0000</color>
+    <color name="demColor">@color/colorPrimary</color>
+    <color name="repColor">@color/colorAccent</color>
+    <color name="indColor">#555</color>
+    <color name="darkerText">#de000000</color>
+    <color name="darkText">#8a000000</color>
 </resources>

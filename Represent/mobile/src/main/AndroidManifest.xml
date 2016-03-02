@@ -12,7 +12,7 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".LocationActivity"
-            android:theme="@style/AppTheme.NoActionBar.LocationActivity">
+            android:theme="@style/AppTheme.Immersive.LocationActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

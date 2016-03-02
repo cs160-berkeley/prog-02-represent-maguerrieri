@@ -4,4 +4,69 @@
     <string name="enter_zip">Enter your ZIP code</string>
     <string name="use_loc">Or use your current location</string>
     <string name="loc_desc">Discover your US representatives</string>
+    <string name="default_zip">94709</string>
+    <string name="invalid_zip">Invalid ZIP code</string>
+    <string name="activity_rep_title_format">Representatives for %s</string>
+    <string name="default_rep_name">Frank Underwood</string>
+    <string name="default_rep_state">SC</string>
+    <string name="default_sen1_name">Hector Mendoza</string>
+    <string name="default_sen1_state">AZ</string>
+    <string name="default_sen2_name">Catherine Durant</string>
+    <string name="default_sen2_state">MO</string>
+    <string name="bills">Bills</string>
+    <string name="bill_desc">Introduced %s</string>
+    <string name="committee_desc">Appointed %s</string>
+    <string name="default_rep_tweet">Happy me day.</string>
+    <string name="default_sen1_tweet">Too many Republicans won\'t invest the political capital to nominate principled constitutionalists to #SCOTUS. I will</string>
+    <string name="default_sen2_tweet"><![CDATA[\"White Americans need to do a better job of listening when African Americans talk about the seen & unseen barriers that you face every day.\"]]></string>
+    <string name="rep_desc_format">%1$s (%2$s—%3$s)</string>
+    <string name="default_rep_username">\@Frank_Underwood</string>
+    <string name="default_sen1_username">\@senhmendoza</string>
+    <string name="default_sen2_username">\@CathyDurant</string>
+    <string name="committees">Committees</string>
+
+    <string-array name="default_rep_bill_names">
+        <item>Education Bill</item>
+        <item>Education Bill</item>
+    </string-array>
+    <string-array name="default_rep_bill_dates">
+        <item>February 2013</item>
+        <item>February 2013</item>
+    </string-array>
+    <string-array name="default_rep_committee_names">
+        <item>Foreign Affairs</item>
+    </string-array>
+    <string-array name="default_rep_committee_dates">
+        <item>July 2005</item>
+    </string-array>
+
+    <string-array name="default_sen1_bill_names">
+        <item>Education Bill</item>
+        <item>Education Bill</item>
+    </string-array>
+    <string-array name="default_sen1_bill_dates">
+        <item>February 2013</item>
+        <item>February 2013</item>
+    </string-array>
+    <string-array name="default_sen1_committee_names">
+        <item>Foreign Affairs</item>
+    </string-array>
+    <string-array name="default_sen1_committee_dates">
+        <item>July 2005</item>
+    </string-array>
+
+    <string-array name="default_sen2_bill_names">
+        <item>Education Bill</item>
+        <item>Education Bill</item>
+    </string-array>
+    <string-array name="default_sen2_bill_dates">
+        <item>February 2013</item>
+        <item>February 2013</item>
+    </string-array>
+    <string-array name="default_sen2_committee_names">
+        <item>Foreign Affairs</item>
+    </string-array>
+    <string-array name="default_sen2_committee_dates">
+        <item>July 2005</item>
+    </string-array>
 </resources>

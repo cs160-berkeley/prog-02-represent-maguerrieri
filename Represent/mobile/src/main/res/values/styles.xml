@@ -6,14 +6,17 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:colorBackground">@android:color/background_light</item>
     </style>
     <style name="AppTheme.NoActionBar" parent="AppTheme">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+    </style>
+    <style name="AppTheme.Immersive" parent="AppTheme.NoActionBar">
         <item name="android:windowTranslucentNavigation">true</item>
         <item name="android:statusBarColor">@color/transparent</item>
     </style>
-    <style name="AppTheme.NoActionBar.LocationActivity" parent="AppTheme.NoActionBar">
+    <style name="AppTheme.Immersive.LocationActivity" parent="AppTheme.Immersive">
         <item name="colorAccent">@color/colorPrimary</item>
         <item name="android:textColorSecondary">@android:color/white</item>
     </style>
