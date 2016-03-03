@@ -4,4 +4,12 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="button_text_margin">8dp</dimen>
+    <dimen name="list_item_height">72dp</dimen>
+    <dimen name="list_item_header_height">48dp</dimen>
+    <dimen name="list_item_top_padding">8dp</dimen>
+    <dimen name="list_item_horizontal_padding">16dp</dimen>
+    <dimen name="list_item_divider_right_margin">-16dp</dimen>
+    <dimen name="button_size">48dp</dimen>
+    <dimen name="rep_tile_height">300dp</dimen>
+    <dimen name="sen_tile_height">200dp</dimen>
 </resources>

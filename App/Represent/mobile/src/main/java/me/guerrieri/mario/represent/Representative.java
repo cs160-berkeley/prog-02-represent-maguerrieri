@@ -2,6 +2,9 @@ package me.guerrieri.mario.represent;
 
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.v4.content.res.ResourcesCompat;
 
 /**
@@ -12,91 +15,13 @@ public class Representative {
     public final RepType type;
     public final String state;
     public final Party party;
-    public final Drawable photo;
+    public final int photoId;
 
     public final String username;
     public final String tweet;
 
     public final Bill[] bills;
     public final Committee[] committees;
-
-    public static Representative getRep(String zip, Resources resources) {
-        // TODO: replace with API calls
-        String[] billNames = resources.getStringArray(R.array.default_rep_bill_names);
-        String[] billDates = resources.getStringArray(R.array.default_rep_bill_dates);
-        Bill[] bills = new Bill[billNames.length];
-        for (int i = 0; i < billNames.length; i ++) {
-            bills[i] = new Bill(billNames[i], billDates[i]);
-        }
-        String[] committeeNames = resources.getStringArray(R.array.default_rep_committee_names);
-        String[] committeeDates = resources.getStringArray(R.array.default_rep_committee_dates);
-        Committee[] committees = new Committee[committeeNames.length];
-        for (int i = 0; i < committeeNames.length; i ++) {
-            committees[i] = new Committee(committeeNames[i], committeeDates[i]);
-        }
-        return new Representative(
-                resources.getString(R.string.default_rep_name),
-                RepType.rep,
-                resources.getString(R.string.default_rep_state),
-                Party.values()[resources.getInteger(R.integer.default_rep_party)],
-                ResourcesCompat.getDrawable(resources, R.drawable.default_rep_image, null),
-                resources.getString(R.string.default_rep_username),
-                resources.getString(R.string.default_rep_tweet),
-                bills, committees
-        );
-    }
-
-    public static Representative[] getSens(String zip, Resources resources) {
-        // TODO: replace with API calls
-        String[] billNames1 = resources.getStringArray(R.array.default_sen1_bill_names);
-        String[] billDates1 = resources.getStringArray(R.array.default_sen1_bill_dates);
-        Bill[] bills1 = new Bill[billNames1.length];
-        for (int i = 0; i < billNames1.length; i ++) {
-            bills1[i] = new Bill(billNames1[i], billDates1[i]);
-        }
-        String[] committeeNames1 = resources.getStringArray(R.array.default_sen1_committee_names);
-        String[] committeeDates1 = resources.getStringArray(R.array.default_sen1_committee_dates);
-        Committee[] committees1 = new Committee[committeeNames1.length];
-        for (int i = 0; i < committeeNames1.length; i ++) {
-            committees1[i] = new Committee(committeeNames1[i], committeeDates1[i]);
-        }
-
-        String[] billNames2 = resources.getStringArray(R.array.default_sen2_bill_names);
-        String[] billDates2 = resources.getStringArray(R.array.default_sen2_bill_dates);
-        Bill[] bills2 = new Bill[billNames2.length];
-        for (int i = 0; i < billNames2.length; i ++) {
-            bills2[i] = new Bill(billNames2[i], billDates2[i]);
-        }
-        String[] committeeNames2 = resources.getStringArray(R.array.default_sen2_committee_names);
-        String[] committeeDates2 = resources.getStringArray(R.array.default_sen2_committee_dates);
-        Committee[] committees2 = new Committee[committeeNames2.length];
-        for (int i = 0; i < committeeNames2.length; i ++) {
-            committees2[i] = new Committee(committeeNames2[i], committeeDates2[i]);
-        }
-
-        return new Representative[] {
-            new Representative(
-                    resources.getString(R.string.default_sen1_name),
-                    RepType.sen,
-                    resources.getString(R.string.default_sen1_state),
-                    Party.values()[resources.getInteger(R.integer.default_sen1_party)],
-                    ResourcesCompat.getDrawable(resources, R.drawable.default_sen1_image, null),
-                    resources.getString(R.string.default_sen1_username),
-                    resources.getString(R.string.default_sen1_tweet),
-                    bills1, committees1
-            ),
-            new Representative(
-                    resources.getString(R.string.default_sen2_name),
-                    RepType.sen,
-                    resources.getString(R.string.default_sen2_state),
-                    Party.values()[resources.getInteger(R.integer.default_sen2_party)],
-                    ResourcesCompat.getDrawable(resources, R.drawable.default_sen2_image, null),
-                    resources.getString(R.string.default_sen2_username),
-                    resources.getString(R.string.default_sen2_tweet),
-                    bills2, committees2
-            )
-        };
-    }
 
     public enum RepType {
         sen,
@@ -114,6 +39,12 @@ public class Representative {
         rep,
         ind;
 
+        public int getColor() {
+            if (this == Representative.Party.dem) return R.color.demColor;
+            else if (this == Representative.Party.rep) return R.color.repColor;
+            else return R.color.indColor;
+        }
+
         @Override
         public String toString() {
             if (this == dem) return "D";
@@ -122,18 +53,48 @@ public class Representative {
         }
     }
 
-    public Representative(String name, RepType type, String state, Party party, Drawable photo,
+    public Representative(String name, RepType type, String state, Party party, int photoId,
                           String username, String tweet, Bill[] bills, Committee[] committees) {
         this.name = name;
         this.type = type;
         this.state = state;
         this.party = party;
-        this.photo = photo;
+        this.photoId = photoId;
 
         this.username = username;
         this.tweet = tweet;
 
         this.bills = bills;
         this.committees = committees;
+    }
+
+    public Representative(Bundle bundle) {
+        this.name = bundle.getString("name");
+        this.type = RepType.values()[bundle.getInt("type")];
+        this.state = bundle.getString("state");
+        this.party = Party.values()[bundle.getInt("party")];
+        this.photoId = bundle.getInt("photoId");
+        this.username = bundle.getString("username");
+        this.tweet = bundle.getString("tweet");
+        Parcelable[] bills = bundle.getParcelableArray("bills");
+        this.bills = new Bill[bills.length];
+        for (int i = 0; i < bills.length; i ++) this.bills[i] = (Bill) bills[i];
+        Parcelable[] committees = bundle.getParcelableArray("committees");
+        this.committees = new Committee[committees.length];
+        for (int i = 0; i < committees.length; i ++) this.committees[i] = (Committee) committees[i];
+    }
+
+    public Bundle toBundle() {
+        Bundle out = new Bundle();
+        out.putString("name", this.name);
+        out.putInt("type", this.type.ordinal());
+        out.putString("state", this.state);
+        out.putInt("party", this.party.ordinal());
+        out.putInt("photoId", this.photoId);
+        out.putString("username", this.username);
+        out.putString("tweet", this.tweet);
+        out.putParcelableArray("bills", bills);
+        out.putParcelableArray("committees", committees);
+        return out;
     }
 }

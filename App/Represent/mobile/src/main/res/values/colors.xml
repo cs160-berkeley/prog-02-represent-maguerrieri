@@ -9,4 +9,5 @@
     <color name="indColor">#555</color>
     <color name="darkerText">#de000000</color>
     <color name="darkText">#8a000000</color>
+    <color name="divider">#1e000000</color>
 </resources>

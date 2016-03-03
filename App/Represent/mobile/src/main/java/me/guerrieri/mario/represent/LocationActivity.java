@@ -3,13 +3,10 @@ package me.guerrieri.mario.represent;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class LocationActivity extends AppCompatActivity {
@@ -30,7 +27,7 @@ public class LocationActivity extends AppCompatActivity {
         public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 if (v.getText().length() == 5) {
-                    startActivity(new Intent(activity, RepActivity.class).putExtra(EXTRA_ZIP,
+                    startActivity(new Intent(activity, RepListActivity.class).putExtra(EXTRA_ZIP,
                             v.getText().toString()));
                     return true;
                 } else {
@@ -46,7 +43,7 @@ public class LocationActivity extends AppCompatActivity {
         public void onClick(View v) {
             String zip = getString(R.string.default_zip); // TODO: replace with geolocation API call
             ((EditText) activity.findViewById(R.id.enter_zip)).setText(zip);
-            activity.startActivity(new Intent(activity, RepActivity.class).putExtra(EXTRA_ZIP, zip));
+            activity.startActivity(new Intent(activity, RepListActivity.class).putExtra(EXTRA_ZIP, zip));
         }
     };
 }
