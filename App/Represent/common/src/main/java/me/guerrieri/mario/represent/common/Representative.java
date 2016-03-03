@@ -1,11 +1,11 @@
-package me.guerrieri.mario.represent;
+package me.guerrieri.mario.represent.common;
 
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.v4.content.res.ResourcesCompat;
+
 
 /**
  * Created by marioguerrieri on 2/27/16.

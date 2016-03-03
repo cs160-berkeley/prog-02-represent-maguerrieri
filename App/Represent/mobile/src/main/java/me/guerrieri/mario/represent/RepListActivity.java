@@ -3,10 +3,8 @@ package me.guerrieri.mario.represent;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.res.ResourcesCompat;
-import android.support.v4.util.Pair;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -20,6 +18,10 @@ import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import me.guerrieri.mario.represent.common.Bill;
+import me.guerrieri.mario.represent.common.Committee;
+import me.guerrieri.mario.represent.common.Representative;
 
 public class RepListActivity extends AppCompatActivity {
     RepListActivity activity = this;
@@ -53,8 +55,6 @@ public class RepListActivity extends AppCompatActivity {
         toolbar.setTitle(String.format(getString(R.string.activity_rep_title_format), this.zip));
 
         this.reps = this.getReps(this.zip);
-
-
     }
 
     @Override

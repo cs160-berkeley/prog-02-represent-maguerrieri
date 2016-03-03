@@ -1,4 +1,4 @@
-package me.guerrieri.mario.represent;
+package me.guerrieri.mario.represent.common;
 
 import android.os.Parcel;
 import android.os.Parcelable;

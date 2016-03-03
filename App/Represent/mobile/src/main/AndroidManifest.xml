@@ -27,7 +27,14 @@
                 <action android:name="android.intent.action.VIEW" />
             </intent-filter>
         </activity>
-        <activity android:name=".RepActivity"></activity>
-    </application>
+        <activity android:name=".RepActivity" />
 
+        <service
+            android:name=".PhoneToWatchService"/>
+        <service android:name=".PhoneListenerService">
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.BIND_LISTENER"/>
+            </intent-filter>
+        </service>
+    </application>
 </manifest>

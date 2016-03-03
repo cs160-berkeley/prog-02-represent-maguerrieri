@@ -1,12 +1,10 @@
 package me.guerrieri.mario.represent;
 
 import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.content.res.ResourcesCompat;
@@ -16,9 +14,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import me.guerrieri.mario.represent.common.Bill;
+import me.guerrieri.mario.represent.common.Committee;
+import me.guerrieri.mario.represent.common.Representative;
 
 public class RepActivity extends Activity implements View.OnClickListener {
     private RepActivity activity = this;
