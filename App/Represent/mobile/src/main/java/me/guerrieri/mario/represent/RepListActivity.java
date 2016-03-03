@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.res.ResourcesCompat;
+import android.support.v4.util.Pair;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -15,6 +16,7 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -242,7 +244,15 @@ public class RepListActivity extends AppCompatActivity {
             activity.startActivity(
                     new Intent(activity, RepActivity.class).putExtra("rep", this.item.toBundle()),
                     ActivityOptionsCompat
-                            .makeSceneTransitionAnimation(activity, this.itemView, "tile").toBundle()
+                            .makeSceneTransitionAnimation(activity,
+                                    android.support.v4.util.Pair.create(this.itemView, "tile"),
+                                    android.support.v4.util.Pair.create(
+                                            activity.findViewById(android.R.id.statusBarBackground),
+                                            Window.STATUS_BAR_BACKGROUND_TRANSITION_NAME),
+                                    android.support.v4.util.Pair.create(
+                                            activity.findViewById(android.R.id.navigationBarBackground),
+                                            Window.NAVIGATION_BAR_BACKGROUND_TRANSITION_NAME)
+                            ).toBundle()
             );
         }
     }
