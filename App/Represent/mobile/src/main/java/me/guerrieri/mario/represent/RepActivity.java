@@ -2,14 +2,19 @@ package me.guerrieri.mario.represent;
 
 import android.animation.ObjectAnimator;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.CoordinatorLayout;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +27,7 @@ import me.guerrieri.mario.represent.common.Committee;
 import me.guerrieri.mario.represent.common.Representative;
 
 public class RepActivity extends Activity implements View.OnClickListener {
+    private static final String TAG = "mobile/RepActivity";
     private RepActivity activity = this;
     private ObjectAnimator oa;
 
@@ -44,6 +50,18 @@ public class RepActivity extends Activity implements View.OnClickListener {
                 return true;
             }
         });
+
+        RecyclerView recyclerView = ((RecyclerView) this.findViewById(R.id.rep_info_view));
+        recyclerView.setAdapter(this.repInfoAdapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Log.d(TAG, "finishing");
+                activity.finish();
+            }
+        }, new IntentFilter(getString(R.string.close_rep_action)));
     }
 
     @Override
@@ -80,10 +98,6 @@ public class RepActivity extends Activity implements View.OnClickListener {
         View expandButton = this.findViewById(R.id.rep_expand);
         expandButton.setOnClickListener(this);
         expandButton.setRotation(180);
-
-        RecyclerView recyclerView = ((RecyclerView) this.findViewById(R.id.rep_info_view));
-        recyclerView.setAdapter(this.repInfoAdapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
 
     @Override
@@ -100,9 +114,6 @@ public class RepActivity extends Activity implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
-        int coordinatorLayoutHeight = this.findViewById(R.id.content_rep).getHeight();
-        int tileHeight = this.findViewById(R.id.rep_tile).getHeight();
-        int peekHeight = coordinatorLayoutHeight - tileHeight;
         this.finishAfterTransition();
     }
 

@@ -1,14 +1,20 @@
 package me.guerrieri.mario.represent;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.content.res.ResourcesCompat;
+import android.support.v4.util.Pair;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Menu;
@@ -19,15 +25,30 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.wearable.MessageApi;
+import com.google.android.gms.wearable.Node;
+import com.google.android.gms.wearable.NodeApi;
+import com.google.android.gms.wearable.Wearable;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+
 import me.guerrieri.mario.represent.common.Bill;
 import me.guerrieri.mario.represent.common.Committee;
 import me.guerrieri.mario.represent.common.Representative;
 
 public class RepListActivity extends AppCompatActivity {
+    private static final String TAG = "RepListActivity";
     RepListActivity activity = this;
+
+    private GoogleApiClient apiClient;
 
     private String zip;
     private Representative[] reps;
+    private HashMap<Integer, RepListViewHolder> viewHolders;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,19 +63,64 @@ public class RepListActivity extends AppCompatActivity {
         RecyclerView recyclerView = ((RecyclerView) this.findViewById(R.id.rep_list));
         recyclerView.setAdapter(this.repListAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        this.viewHolders = new HashMap<>();
+
+        this.apiClient = new GoogleApiClient.Builder(this).addApi(Wearable.API).build();
+        this.apiClient.connect();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
 
+        String oldZip = this.zip;
         Bundle extras = this.getIntent().getExtras();
-        if (extras != null) this.zip = extras.getString(LocationActivity.EXTRA_ZIP);
+        if (extras != null) {
+            this.zip = extras.getString(LocationActivity.EXTRA_ZIP);
+        }
+        if (!this.zip.equals(oldZip)) { // if we got a new zip
+            Toolbar toolbar = (Toolbar) this.findViewById(R.id.toolbar);
+            toolbar.setTitle(String.format(getString(R.string.activity_rep_title_format), this.zip));
 
-        Toolbar toolbar = (Toolbar) this.findViewById(R.id.toolbar);
-        toolbar.setTitle(String.format(getString(R.string.activity_rep_title_format), this.zip));
+            this.reps = this.getReps(this.zip);
 
-        this.reps = this.getReps(this.zip);
+            Intent updateWatchIntent = new Intent(this.getBaseContext(), PhoneToWatchService.class);
+            for (int i = 0; i < this.reps.length; i ++) {
+                updateWatchIntent.putExtra(Integer.toString(i), this.reps[i].toBundle());
+            }
+            this.startService(updateWatchIntent);
+        }
+
+        LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
+        lbm.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Log.d(TAG, String.format("got rep change %s", intent.getExtras().getInt("ind")));
+                int i = intent.getExtras().getInt("ind");
+                Representative rep;
+                View view = null;
+                if (activity.viewHolders.containsKey(i)) {
+                    RepListViewHolder holder = activity.viewHolders.get(i);
+                    rep = holder.item;
+                    view = holder.itemView;
+                } else {
+                    rep = activity.reps[i];
+                }
+                activity.switchToRep(rep, view);
+            }
+        }, new IntentFilter(this.getString(R.string.rep_changed_action)));
+
+        lbm.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Log.d(TAG, String.format("got random rep"));
+                Intent restart = new Intent(activity, RepListActivity.class)
+                        .putExtra(LocationActivity.EXTRA_ZIP, "99999") // TODO: actually make random
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                activity.startActivity(restart);
+            }
+        }, new IntentFilter(this.getString(R.string.rep_random_action)));
     }
 
     @Override
@@ -62,6 +128,13 @@ public class RepListActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         this.getMenuInflater().inflate(R.menu.menu_rep, menu);
         return true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        this.apiClient.disconnect();
     }
 
     @Override
@@ -168,6 +241,25 @@ public class RepListActivity extends AppCompatActivity {
         };
     }
 
+    public void switchToRep(Representative to, View view) {
+        if (view == null) Log.d(TAG, "switchToRep: null view");
+        LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(getString(R.string.close_rep_action)));
+        this.startActivity(
+                new Intent(activity, RepActivity.class)
+                        .putExtra("rep", to.toBundle())//, TODO: fix animations
+//                ActivityOptionsCompat
+//                        .makeSceneTransitionAnimation(activity,
+//                                android.support.v4.util.Pair.create(view, "tile"),
+//                                android.support.v4.util.Pair.create(
+//                                        activity.findViewById(android.R.id.statusBarBackground),
+//                                        Window.STATUS_BAR_BACKGROUND_TRANSITION_NAME),
+//                                android.support.v4.util.Pair.create(
+//                                        activity.findViewById(android.R.id.navigationBarBackground),
+//                                        Window.NAVIGATION_BAR_BACKGROUND_TRANSITION_NAME)
+//                        ).toBundle()
+        );
+    }
+
     RecyclerView.Adapter repListAdapter = new RecyclerView.Adapter<RepListViewHolder>() {
         @Override
         public RepListViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -177,10 +269,13 @@ public class RepListActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(RepListViewHolder holder, int position) {
+            activity.viewHolders.put(position, holder);
+
             Resources resources = activity.getResources();
             Representative rep = activity.reps[position];
 
             holder.item = rep;
+            holder.position = position;
 
             holder.tile.setImageDrawable(
                     ResourcesCompat.getDrawable(resources, rep.photoId, null)
@@ -211,6 +306,7 @@ public class RepListActivity extends AppCompatActivity {
 
     class RepListViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public Representative item;
+        private int position;
 
         public final View itemView;
 
@@ -241,19 +337,21 @@ public class RepListActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
             this.itemView.setTransitionName("tile");
-            activity.startActivity(
-                    new Intent(activity, RepActivity.class).putExtra("rep", this.item.toBundle()),
-                    ActivityOptionsCompat
-                            .makeSceneTransitionAnimation(activity,
-                                    android.support.v4.util.Pair.create(this.itemView, "tile"),
-                                    android.support.v4.util.Pair.create(
-                                            activity.findViewById(android.R.id.statusBarBackground),
-                                            Window.STATUS_BAR_BACKGROUND_TRANSITION_NAME),
-                                    android.support.v4.util.Pair.create(
-                                            activity.findViewById(android.R.id.navigationBarBackground),
-                                            Window.NAVIGATION_BAR_BACKGROUND_TRANSITION_NAME)
-                            ).toBundle()
-            );
+            activity.switchToRep(this.item, this.itemView);
+//            new Thread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(activity.apiClient).await();
+//                    for(Node node : nodes.getNodes()) {
+//                        //we find 'nodes', which are nearby bluetooth devices (aka emulators)
+//                        //send a message for each of these nodes (just one, for an emulator)
+//                        MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(
+//                                activity.apiClient, node.getId(), getString(R.string.rep_changed_path), Integer.toString(holder.position).getBytes()).await();
+//                        //4 arguments: api client, the node ID, the path (for the listener to parse),
+//                        //and the message itself (you need to convert it to bytes.)
+//                    }
+//                }
+//            }).start();
         }
     }
 }
