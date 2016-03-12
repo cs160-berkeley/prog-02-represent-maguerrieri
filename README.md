@@ -9,4 +9,4 @@
 ### Links
 [Demo video](https://youtu.be/qoJdMNw2Fdg)
 
-[GitHub repository](https://github.com/cs160-sp16/prog-01-crunch-time-maguerrieri)
+[GitHub repository](https://github.com/cs160-sp16/prog-02-represent-maguerrieri)
