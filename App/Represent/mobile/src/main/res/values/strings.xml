@@ -3,5 +3,9 @@
     <string name="action_settings">Settings</string>
     <string name="close_rep_action">close_rep</string>
     <string name="rep_random_action">rep_random</string>
+    <string name="zip_bundle_key">zip</string>
+    <string name="lat_bundle_key">lat</string>
+    <string name="long_bundle_key">long</string>
+    <string name="random">Random location</string>
 
 </resources>

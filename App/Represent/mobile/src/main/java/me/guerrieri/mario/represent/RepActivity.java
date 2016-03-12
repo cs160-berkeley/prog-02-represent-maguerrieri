@@ -7,6 +7,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.CoordinatorLayout;
@@ -19,8 +23,24 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.koushikdutta.ion.Ion;
+import com.twitter.sdk.android.core.Callback;
+import com.twitter.sdk.android.core.Result;
+import com.twitter.sdk.android.core.TwitterException;
+import com.twitter.sdk.android.core.models.Tweet;
+import com.twitter.sdk.android.tweetui.TweetUtils;
+import com.twitter.sdk.android.tweetui.TweetView;
+
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
 
 import me.guerrieri.mario.represent.common.Bill;
 import me.guerrieri.mario.represent.common.Committee;
@@ -31,7 +51,7 @@ public class RepActivity extends Activity implements View.OnClickListener {
     private RepActivity activity = this;
     private ObjectAnimator oa;
 
-    private Representative rep;
+    private UnloadedRepresentative rep;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,13 +75,13 @@ public class RepActivity extends Activity implements View.OnClickListener {
         recyclerView.setAdapter(this.repInfoAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        LocalBroadcastManager.getInstance(this).registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                Log.d(TAG, "finishing");
-                activity.finish();
-            }
-        }, new IntentFilter(getString(R.string.close_rep_action)));
+//        LocalBroadcastManager.getInstance(this).registerReceiver(new BroadcastReceiver() {
+//            @Override
+//            public void onReceive(Context context, Intent intent) {
+//                Log.d(TAG, "finishing");
+//                activity.finish();
+//            }
+//        }, new IntentFilter(getString(R.string.close_rep_action)));
     }
 
     @Override
@@ -69,46 +89,25 @@ public class RepActivity extends Activity implements View.OnClickListener {
         super.onStart();
 
         Intent intent = this.getIntent();
-        this.rep = new Representative(intent.getExtras().getBundle("rep"));
+//        String photoFileName = intent.getExtras().getBundle("rep").getString("photoFileName");
+        this.rep = new UnloadedRepresentative(intent.getExtras().getBundle("rep"));
+//        Bitmap photo = BitmapFactory.decodeFile(photoFileName);
+//        ().setImageDrawable(
+//                new BitmapDrawable(this.getResources(), photo)
+//        );
 
-        CoordinatorLayout coordinatorLayout = ((CoordinatorLayout) this.findViewById(R.id.content_rep));
-        View tile = LayoutInflater.from(this).inflate(
-                this.rep.type == Representative.RepType.rep ?
-                        R.layout.rep_tile :
-                        R.layout.sen_tile,
-                coordinatorLayout, false);
-        tile.setTransitionName("tile");
-        coordinatorLayout.addView(tile);
 
-        Resources resources = this.getResources();
 
-        ((ImageView) this.findViewById(R.id.rep_tile)).setImageDrawable(
-                ResourcesCompat.getDrawable(resources, rep.photoId, null)
-        );
-        ((TextView) this.findViewById(R.id.rep_name)).setText(rep.name);
-        ((TextView) this.findViewById(R.id.rep_desc)).setText(
-                String.format(getString(R.string.rep_desc_format), rep.type, rep.party, rep.state)
-        );
-        this.findViewById(R.id.rep_tweet_box).setBackgroundColor(
-                ResourcesCompat.getColor(resources, this.rep.party.getColor(), null)
-        );
-        ((TextView) this.findViewById(R.id.rep_username)).setText(rep.username);
-        ((TextView) this.findViewById(R.id.rep_tweet)).setText(rep.tweet);
 
-        View expandButton = this.findViewById(R.id.rep_expand);
-        expandButton.setOnClickListener(this);
-        expandButton.setRotation(180);
+//            holder.tile.setImageDrawable(
+//                    new BitmapDrawable(activity.getResources(), rep.photo)
+//            );
+
     }
 
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         if (hasFocus) {
-            View frame = this.findViewById(R.id.rep_info_frame);
-            BottomSheetBehavior sheet = BottomSheetBehavior.from(frame);
-            int coordinatorLayoutHeight = this.findViewById(R.id.content_rep).getHeight();
-            int tileHeight = this.findViewById(R.id.rep_tile).getHeight();
-            int peekHeight = coordinatorLayoutHeight - tileHeight;
-            sheet.setPeekHeight(peekHeight);
         }
     }
 
@@ -126,7 +125,53 @@ public class RepActivity extends Activity implements View.OnClickListener {
 
         @Override
         public void onBindViewHolder(RepInfoViewHolder holder, int position) {
-            if (position == 0) {
+            position -= 1;
+            if (position == -1) {
+                View tile = holder.itemView.findViewById(R.id.rep_full_tile);
+                tile.setTransitionName("tile");
+                tile.findViewById(R.id.rep_expand).setVisibility(View.GONE);
+
+                ((TextView) holder.itemView.findViewById(R.id.rep_name)).setText(rep.name);
+                ((TextView) holder.itemView.findViewById(R.id.rep_desc)).setText(
+                        String.format(getString(R.string.rep_desc_format), rep.type, rep.party, rep.state)
+                );
+                tile.setBackgroundColor(activity.getResources().getColor(rep.party.getColor()));
+
+                if (rep.showBanner) {
+                    Ion.with(activity)
+                            .load(rep.bannerURL)
+                            .withBitmap()
+                            .placeholder(R.drawable.default_rep_image)
+                            .error(R.drawable.default_rep_image)
+                            .intoImageView((ImageView) holder.itemView.findViewById(R.id.rep_tile));
+                }
+
+                final int tweetStyle = rep.party == Representative.Party.dem ?
+                        R.style.TweetDemStyle : rep.party == Representative.Party.rep ?
+                        R.style.TweetRepStyle : R.style.TweetIndStyle;
+                TweetUtils.loadTweet(rep.tweetID, new Callback<Tweet>() {
+                    @Override
+                    public void success(Result<Tweet> result) {
+                        FrameLayout frame = ((FrameLayout) activity.findViewById(R.id.rep_tweet_frame));
+                        frame.addView(new TweetView(activity, result.data, tweetStyle));
+                        frame.requestLayout();
+                    }
+
+                    @Override
+                    public void failure(TwitterException e) {
+
+                    }
+                });
+
+                holder.itemView.findViewById(R.id.rep_web).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent i = new Intent(Intent.ACTION_VIEW);
+                        i.setData(Uri.parse(rep.website));
+                        startActivity(i);
+                    }
+                });
+            } else if (position == 0) {
                 holder.title.setText(activity.getResources().getString(R.string.bills));
             } else if (position - 1 < activity.rep.bills.length) { // bill
                 Bill bill = activity.rep.bills[position - 1];
@@ -138,12 +183,14 @@ public class RepActivity extends Activity implements View.OnClickListener {
             } else if (position - activity.rep.bills.length - 2 < activity.rep.committees.length) { // committee
                 Committee committee = activity.rep.committees[position - activity.rep.bills.length - 2];
                 holder.title.setText(committee.title);
-                holder.desc.setText(String.format(getString(R.string.committee_desc), committee.date));
+                holder.desc.setText(String.format(getString(R.string.committee_desc), committee.desc));
             }
         }
 
         @Override
         public int getItemViewType(int position) {
+            position -= 1;
+            if (position == -1) return R.layout.rep_tile;
             if (position == 0) return R.layout.list_item_rep_header;
             else if (position - 1 < activity.rep.bills.length) return R.layout.list_item_rep_info;
             else if (position - 1 == activity.rep.bills.length) return R.layout.list_item_rep_header;
@@ -153,7 +200,7 @@ public class RepActivity extends Activity implements View.OnClickListener {
 
         @Override
         public int getItemCount() {
-            return activity.rep.bills.length + activity.rep.committees.length + 2;
+            return activity.rep.bills.length + activity.rep.committees.length + 3;
         }
     };
 

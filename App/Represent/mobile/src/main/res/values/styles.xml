@@ -29,4 +29,16 @@
         <item name="android:fontFamily">sans-serif-light</item>
     </style>
 
+    <style name="TweetDemStyle" parent="tw__TweetDarkStyle">
+        <item name="tw__container_bg_color">@color/demColor</item>
+        <item name="tw__action_color">@color/lightText</item>
+    </style>
+    <style name="TweetRepStyle" parent="tw__TweetDarkStyle">
+        <item name="tw__container_bg_color">@color/repColor</item>
+        <item name="tw__action_color">@color/lightText</item>
+    </style>
+    <style name="TweetIndStyle" parent="tw__TweetDarkStyle">
+        <item name="tw__container_bg_color">@color/indColor</item>
+        <item name="tw__action_color">@color/lighterText</item>
+    </style>
 </resources>

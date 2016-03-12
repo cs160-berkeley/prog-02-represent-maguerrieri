@@ -1,6 +1,9 @@
 <resources>
+    <string name="app_name">Represent!</string>
+
     <string name="rep_message_key">me.guerrieri.mario.represent.REP_BUNDLE</string>
-    <string name="rep_message_path">/rep</string><string name="enter_zip">Enter your ZIP code</string>
+    <string name="rep_message_path">/rep</string>
+    <string name="enter_zip">Enter your ZIP code</string>
     <string name="use_loc">Or use your current location</string>
     <string name="loc_desc">Discover your US representatives</string>
     <string name="default_zip">94709</string>
@@ -14,7 +17,7 @@
     <string name="default_sen2_state">MO</string>
     <string name="bills">Bills</string>
     <string name="bill_desc">Introduced %s</string>
-    <string name="committee_desc">Appointed %s</string>
+    <string name="committee_desc">%s</string>
     <string name="default_rep_tweet">Happy me day.</string>
     <string name="default_sen1_tweet">Too many Republicans won\'t invest the political capital to nominate principled constitutionalists to #SCOTUS. I will</string>
     <string name="default_sen2_tweet"><![CDATA[\"White Americans need to do a better job of listening when African Americans talk about the seen & unseen barriers that you face every day.\"]]></string>
@@ -24,8 +27,11 @@
     <string name="default_sen2_username">\@CathyDurant</string>
     <string name="committees">Committees</string>
     <string name="rep_changed_path">/rep_changed</string>
+    <string name="loc_path">/loc</string>
     <string name="rep_changed_action">rep_changed</string>
     <string name="rep_random_path">/rep_random</string>
+    <string name="no_zip_error">Nothing to show! Select a location on your phone.</string>
+    <string name="loc_action">loc</string>
 
     <string-array name="default_rep_bill_names">
         <item>Education Bill</item>

@@ -1,5 +1,0 @@
-<resources>
-    <string name="app_name">Represent!</string>
-    <string name="hello_world">Hello World!</string>
-    <string name="no_zip_error">No location selected! Enter your ZIP code on your phone.</string>
-</resources>

@@ -6,6 +6,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -19,16 +21,29 @@ import android.support.wearable.view.GridViewPager;
 import android.util.Log;
 
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.wearable.Asset;
 import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.DataItem;
+import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.DataMapItem;
 import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
+import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
+import com.koushikdutta.async.future.FutureCallback;
+import com.koushikdutta.async.future.FutureRunnable;
+import com.koushikdutta.async.future.FutureThread;
 
+import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.RunnableFuture;
 
 import me.guerrieri.mario.represent.common.Bill;
 import me.guerrieri.mario.represent.common.Committee;
@@ -41,7 +56,7 @@ public class RepActivity extends WearableActivity {
     private GridViewPager pager;
 
     private String zip;
-    private Representative[] reps;
+    private ArrayList<Representative> reps;
 
 //    private Uri photo;
 
@@ -54,11 +69,18 @@ public class RepActivity extends WearableActivity {
     private float accelCurrent;
     private float accelLast;
     private PresCardFragment presCard;
+    private Node connectedNode;
+    private RepCardFragmentAdapter adapter;
+    private String county;
+    private double obamaVotes;
+    private double romneyVotes;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_rep);
+
+        this.reps = new ArrayList<>();
 
         this.apiClient = new GoogleApiClient.Builder(this)
                 .addApi(Wearable.API)
@@ -83,7 +105,8 @@ public class RepActivity extends WearableActivity {
         this.accelLast = SensorManager.GRAVITY_EARTH;
 
         this.pager = ((GridViewPager) this.findViewById(R.id.grid_pager));
-        this.pager.setAdapter(new RepCardFragmentAdapter(this.getFragmentManager()));
+        this.adapter = new RepCardFragmentAdapter(this.getFragmentManager());
+        this.pager.setAdapter(this.adapter);
         this.pager.setOnPageChangeListener(new GridViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int i, int i1, float v, float v1, int i2, int i3) {
@@ -97,13 +120,13 @@ public class RepActivity extends WearableActivity {
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            Log.d(TAG, String.format("sending %s %s", activity.getString(R.string.rep_changed_path), Integer.toString(col - 1)));
+                            Log.d(TAG, String.format("sending %s %s", activity.getString(R.string.rep_changed_path), activity.reps.get(col - 1).name));
                             NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(activity.apiClient).await();
                             for (Node node : nodes.getNodes()) {
                                 //we find 'nodes', which are nearby bluetooth devices (aka emulators)
                                 //send a message for each of these nodes (just one, for an emulator)
                                 MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(
-                                        activity.apiClient, node.getId(), getString(R.string.rep_changed_path), Integer.toString(col - 1).getBytes()).await();
+                                        activity.apiClient, node.getId(), getString(R.string.rep_changed_path), activity.reps.get(col - 1).name.getBytes()).await();
                                 //4 arguments: api client, the node ID, the path (for the listener to parse),
                                 //and the message itself (you need to convert it to bytes.)
                                 Log.d(TAG, String.format("message sent: %s", result.getStatus().getStatusMessage()));
@@ -118,6 +141,72 @@ public class RepActivity extends WearableActivity {
 
             }
         });
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, final Intent intent) {
+                Log.d(TAG, "rep changed");
+                Wearable.NodeApi
+                        .getConnectedNodes(activity.apiClient)
+                        .setResultCallback(new ResultCallback<NodeApi.GetConnectedNodesResult>() {
+                    @Override
+                    public void onResult(NodeApi.GetConnectedNodesResult getConnectedNodesResult) {
+                        for (Node node : getConnectedNodesResult.getNodes()) {
+                            activity.connectedNode = node;
+                        }
+                        Uri uri = new Uri.Builder()
+                                .scheme(PutDataRequest.WEAR_URI_SCHEME)
+                                .path(intent.getStringExtra("dataPath"))
+                                .authority(activity.connectedNode.getId())
+                                .build();
+                        Wearable.DataApi.getDataItem(activity.apiClient, uri)
+                                .setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
+                                    @Override
+                                    public void onResult(DataApi.DataItemResult dataItemResult) {
+//                                        byte[] data = dataItemResult
+//                                                .getDataItem()
+//                                                .getData();
+                                        final DataMap dataMap = DataMapItem.fromDataItem(dataItemResult
+                                                .getDataItem()).getDataMap();
+                                        if (dataMap.getString("dataType").equals("rep")) {
+                                            for (int i = 0; dataMap.containsKey(Integer.toString(i)); i ++) {
+                                                final DataMap innerMap = dataMap.getDataMap(Integer.toString(i));
+                                                activity.loadBitmapFromAsset(innerMap.getAsset("photo")).setCallback(new FutureCallback<Bitmap>() {
+                                                    @Override
+                                                    public void onCompleted(Exception e, final Bitmap photoResult) {
+                                                        activity.loadBitmapFromAsset(innerMap.getAsset("banner")).setCallback(new FutureCallback<Bitmap>() {
+                                                            @Override
+                                                            public void onCompleted(Exception e, Bitmap bannerResult) {
+                                                                activity.addRep(
+                                                                        innerMap.getInt("ind"),
+                                                                        new Representative(
+                                                                                innerMap.getString("name"),
+                                                                                Representative.RepType.values()[innerMap.getInt("type")],
+                                                                                innerMap.getString("state"),
+                                                                                Representative.Party.values()[innerMap.getInt("party")],
+                                                                                photoResult,
+                                                                                bannerResult,
+                                                                                null, null
+                                                                        ));
+                                                            }
+                                                        });
+                                                    }
+                                                });
+                                            }
+                                        } else {
+                                            activity.reps.clear();
+                                            activity.adapter.notifyDataSetChanged();
+                                            activity.county = dataMap.getString("county");
+                                            activity.obamaVotes = dataMap.getDouble("obama");
+                                            activity.romneyVotes = dataMap.getDouble("romney");
+                                            activity.adapter.notifyDataSetChanged();
+                                        }
+                                    }
+                                });
+                    }
+                });
+            }
+        }, new IntentFilter(this.getString(R.string.rep_changed_action)));
 //        BitmapDrawable test = new BitmapDrawable(this.getResources(), BitmapFactory.decodeResource(this.getResources(), R.drawable.default_rep_image));
 //        this.reps = new Representative[] {
 //            new Representative(
@@ -135,6 +224,11 @@ public class RepActivity extends WearableActivity {
 //        setAmbientEnabled();
     }
 
+    private void addRep(int index, Representative representative) {
+        this.reps.add(representative);
+        this.adapter.notifyDataSetChanged();
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -144,34 +238,33 @@ public class RepActivity extends WearableActivity {
     protected void onResume() {
         super.onResume();
 
-        LocalBroadcastManager.getInstance(this).registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                Log.d(TAG, String.format("got rep change %s", intent.getExtras().getInt("ind")));
-                activity.pager.setCurrentItem(0, intent.getExtras().getInt("ind") + 1);
-            }
-        }, new IntentFilter(this.getString(R.string.rep_changed_action)));
+//        LocalBroadcastManager.getInstance(this).registerReceiver(new BroadcastReceiver() {
+//            @Override
+//            public void onReceive(Context context, Intent intent) {
+//                Log.d(TAG, String.format("got rep change %s", intent.getExtras().getInt("ind")));
+//                activity.pager.setCurrentItem(0, intent.getExtras().getInt("ind") + 1);
+//            }
+//        }, new IntentFilter(this.getString(R.string.rep_changed_action)));
 
-        Bundle extras = this.getIntent().getExtras();
-        if (extras != null) {
-            this.zip = extras.getString("zip");
-            if (extras.getBundle("reps") != null) {
-                Bundle repsBundle = extras.getBundle("reps");
-                ArrayList<Representative> reps = new ArrayList<>();
-                int i = 0;
-                Bundle bundle = repsBundle.getBundle("0");
-                while (bundle != null) {
-                    reps.add(new Representative(bundle));
-                    bundle = repsBundle.getBundle(Integer.toString(++i));
-                }
-                this.reps = reps.toArray(new Representative[reps.size()]);
-            }
-        }
+//        Bundle extras = this.getIntent().getExtras();
+//        if (extras != null) {
+//            this.zip = extras.getString("zip");
+//            if (extras.getBundle("reps") != null) {
+//                Bundle repsBundle = extras.getBundle("reps");
+//                ArrayList<Representative> reps = new ArrayList<>();
+//                int i = 0;
+//                Bundle bundle = repsBundle.getBundle("0");
+//                while (bundle != null) {
+//                    reps.add(new Representative(bundle));
+//                    bundle = repsBundle.getBundle(Integer.toString(++i));
+//                }
+//                this.reps = reps;
+//            }
+//        }
 
         this.sensorManager.registerListener(new SensorEventListener() { // TODO: unregister on pause
             @Override
             public void onSensorChanged(SensorEvent se) {
-                Log.d(TAG, String.format("onSensorChanged %s", Arrays.toString(se.values)));
                 // http://stackoverflow.com/questions/2317428/android-i-want-to-shake-it
                 float x = se.values[0];
                 float y = se.values[1];
@@ -182,6 +275,7 @@ public class RepActivity extends WearableActivity {
                 activity.accel = activity.accel * 0.9f + delta; // perform low-cut filter
 
                 if (activity.accel > 12) {
+                    Log.d(TAG, String.format("onSensorChanged %s", Arrays.toString(se.values)));
                     activity.sendRandom();
                 }
             }
@@ -194,8 +288,6 @@ public class RepActivity extends WearableActivity {
     }
 
     private void sendRandom() {
-        this.zip = "99999";
-        if (this.presCard != null) this.presCard.updateZip(this.zip);
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -212,6 +304,23 @@ public class RepActivity extends WearableActivity {
                 }
             }
         }).start();
+    }
+
+    private com.koushikdutta.async.future.Future<Bitmap> loadBitmapFromAsset(final Asset asset) {
+        return new FutureThread<>(new FutureRunnable<Bitmap>() {
+            @Override
+            public Bitmap run() throws Exception {
+                InputStream assetInputStream = Wearable.DataApi
+                        .getFdForAsset(activity.apiClient, asset)
+                        .await()
+                        .getInputStream();
+                return BitmapFactory.decodeStream(assetInputStream);
+            }
+        });
+    }
+
+    public Representative getRep(int index) {
+        return this.reps.get(index);
     }
 
     @Override
@@ -259,16 +368,21 @@ public class RepActivity extends WearableActivity {
 
         @Override
         public Fragment getFragment(int row, int col) {
-            if (activity.reps != null && activity.reps.length > 0) {
+            if (activity.reps != null && activity.reps.size() > 0) {
                 if (col > 0) {
-                    Representative rep = activity.reps[col - 1];
+                    Representative rep = activity.reps.get(col - 1);
                     Fragment frag = new RepCardFragment();
                     Bundle args = rep.toBundle();
-                    if (activity.zip != null) args.putString("zip", activity.zip);
+                    args.putInt("ind", col - 1);
                     frag.setArguments(args);
                     return frag;
                 } else {
                     activity.presCard = new PresCardFragment();
+                    Bundle args = new Bundle();
+                    args.putString("county", activity.county);
+                    args.putDouble("obama", activity.obamaVotes);
+                    args.putDouble("romney", activity.romneyVotes);
+                    activity.presCard.setArguments(args);
                     return activity.presCard;
                 }
             } else return new NoZipCardFragment();
@@ -281,7 +395,7 @@ public class RepActivity extends WearableActivity {
 
         @Override
         public int getColumnCount(int i) {
-            if (activity.reps != null && activity.reps.length > 0) return activity.reps.length + 1;
+            if (activity.reps != null && activity.reps.size() > 0) return activity.reps.size() + 1;
             else return 1;
         }
     }

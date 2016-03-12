@@ -1,10 +1,15 @@
 package me.guerrieri.mario.represent.common;
 
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
 
 
 /**
@@ -15,10 +20,8 @@ public class Representative {
     public final RepType type;
     public final String state;
     public final Party party;
-    public final int photoId;
-
-    public final String username;
-    public final String tweet;
+    public final Bitmap photo;
+    public final Bitmap banner;
 
     public final Bill[] bills;
     public final Committee[] committees;
@@ -31,6 +34,10 @@ public class Representative {
         public String toString() {
             if (this == sen) return "Senator";
             else return "Representative";
+        }
+
+        public static RepType fromString(String title) {
+            return title.equalsIgnoreCase("sen") ? sen : rep;
         }
     }
 
@@ -51,18 +58,20 @@ public class Representative {
             else if (this == rep) return "R";
             else return "I";
         }
+
+        public static Party fromString(String abr) {
+            return abr.equalsIgnoreCase("d") ? dem : abr.equalsIgnoreCase("r") ? rep : ind;
+        }
     }
 
-    public Representative(String name, RepType type, String state, Party party, int photoId,
-                          String username, String tweet, Bill[] bills, Committee[] committees) {
+    public Representative(String name, RepType type, String state, Party party, Bitmap photo, Bitmap banner,
+                          Bill[] bills, Committee[] committees) {
         this.name = name;
         this.type = type;
         this.state = state;
         this.party = party;
-        this.photoId = photoId;
-
-        this.username = username;
-        this.tweet = tweet;
+        this.photo = photo;
+        this.banner = banner;
 
         this.bills = bills;
         this.committees = committees;
@@ -73,9 +82,10 @@ public class Representative {
         this.type = RepType.values()[bundle.getInt("type")];
         this.state = bundle.getString("state");
         this.party = Party.values()[bundle.getInt("party")];
-        this.photoId = bundle.getInt("photoId");
-        this.username = bundle.getString("username");
-        this.tweet = bundle.getString("tweet");
+        byte[] photo = bundle.getByteArray("photo");
+        this.photo = photo != null ? BitmapFactory.decodeByteArray(photo, 0, photo.length) : null;
+        byte[] banner = bundle.getByteArray("banner");
+        this.banner = banner != null ? BitmapFactory.decodeByteArray(photo, 0, banner.length) : null;
         Parcelable[] bills = bundle.getParcelableArray("bills");
         this.bills = new Bill[bills.length];
         for (int i = 0; i < bills.length; i ++) this.bills[i] = (Bill) bills[i];
@@ -90,9 +100,16 @@ public class Representative {
         out.putInt("type", this.type.ordinal());
         out.putString("state", this.state);
         out.putInt("party", this.party.ordinal());
-        out.putInt("photoId", this.photoId);
-        out.putString("username", this.username);
-        out.putString("tweet", this.tweet);
+        if (this.photo != null) {
+            ByteBuffer pbuf = ByteBuffer.allocate(this.photo.getRowBytes() * this.photo.getHeight());
+            this.photo.copyPixelsToBuffer(pbuf);
+            out.putByteArray("photo", pbuf.array());
+        }
+        if (this.banner != null) {
+            ByteBuffer bbuf = ByteBuffer.allocate(this.banner.getRowBytes() * this.banner.getHeight());
+            this.banner.copyPixelsToBuffer(bbuf);
+            out.putByteArray("banner", bbuf.array());
+        }
         out.putParcelableArray("bills", bills);
         out.putParcelableArray("committees", committees);
         return out;

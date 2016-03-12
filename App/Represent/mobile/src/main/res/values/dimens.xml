@@ -10,6 +10,6 @@
     <dimen name="list_item_horizontal_padding">16dp</dimen>
     <dimen name="list_item_divider_right_margin">-16dp</dimen>
     <dimen name="button_size">48dp</dimen>
-    <dimen name="rep_tile_height">300dp</dimen>
+    <dimen name="rep_tile_height">150dp</dimen>
     <dimen name="sen_tile_height">200dp</dimen>
 </resources>

@@ -8,11 +8,11 @@ import android.os.Parcelable;
  */
 public class Committee implements Parcelable {
     public final String title;
-    public final String date;
+    public final String desc;
 
-    public Committee(String title, String date) {
+    public Committee(String title, String desc) {
         this.title = title;
-        this.date = date;
+        this.desc = desc;
     }
 
     public static final Parcelable.Creator<Committee> CREATOR = new Parcelable.Creator<Committee>() {
@@ -29,7 +29,7 @@ public class Committee implements Parcelable {
 
     public Committee(Parcel parcel) {
         this.title = parcel.readString();
-        this.date = parcel.readString();
+        this.desc = parcel.readString();
     }
 
     @Override
@@ -40,6 +40,6 @@ public class Committee implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(this.title);
-        dest.writeString(this.date);
+        dest.writeString(this.desc);
     }
 }

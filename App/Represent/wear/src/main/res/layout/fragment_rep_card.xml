@@ -2,12 +2,21 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <ImageView
-        android:id="@+id/rep_tile"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:scaleType="centerCrop"/>
+        android:layout_weight="1">
+        <ImageView
+            android:id="@+id/rep_tile"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"/>
+        <ImageView
+            android:id="@+id/rep_photo"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:scaleType="centerCrop"/>
+    </FrameLayout>
     <LinearLayout
         android:id="@+id/info_box"
         android:layout_width="match_parent"

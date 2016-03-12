@@ -1,49 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+<LinearLayout
+    android:id="@+id/rep_full_tile"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/rep_tile_height">
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:elevation="4dp"
+    android:clipToPadding="false"
+    android:outlineProvider="bounds"
+    android:layout_marginBottom="8dp"
+    android:layout_marginLeft="8dp"
+    android:layout_marginRight="8dp">
     <ImageView
         android:id="@+id/rep_tile"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:maxHeight="@dimen/rep_tile_height"
         android:scaleType="centerCrop"/>
-    <RelativeLayout
+    <FrameLayout
+        android:id="@+id/rep_tweet_frame"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="right">
+        android:layout_height="wrap_content"/>
+    <RelativeLayout
+        android:id="@+id/rep_buttons"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
         <TextView
             android:id="@+id/rep_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/rep_desc"/>
+            android:layout_above="@+id/rep_desc"
+            android:visibility="gone"/>
         <TextView
             android:id="@+id/rep_desc"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/rep_tweet_box"/>
-        <LinearLayout
-            android:id="@+id/rep_tweet_box"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_above="@+id/rep_expand"
-            android:orientation="vertical">
-            <TextView
-                android:id="@+id/rep_username"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-            <TextView
-                android:id="@+id/rep_tweet"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-        </LinearLayout>
-        <ImageButton
-            android:id="@+id/rep_expand"
-            android:layout_width="@dimen/button_size"
-            android:layout_height="@dimen/button_size"
-            android:layout_alignParentBottom="true"
-            android:src="@drawable/expand_more"
-            android:scaleType="centerInside"
-            style="?android:attr/borderlessButtonStyle"/>
+            android:visibility="gone"/>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <ImageButton
+                android:id="@+id/rep_web"
+                android:layout_width="@dimen/button_size"
+                android:layout_height="@dimen/button_size"
+                android:layout_alignParentLeft="true"
+                android:src="@drawable/web"
+                android:scaleType="centerInside"
+                style="?android:attr/borderlessButtonStyle"/>
+            <ImageButton
+                android:id="@+id/rep_mail"
+                android:layout_width="@dimen/button_size"
+                android:layout_height="@dimen/button_size"
+                android:layout_toRightOf="@+id/rep_web"
+                android:src="@drawable/mail"
+                android:scaleType="centerInside"
+                style="?android:attr/borderlessButtonStyle"/>
+            <ImageButton
+                android:id="@+id/rep_expand"
+                android:layout_width="@dimen/button_size"
+                android:layout_height="@dimen/button_size"
+                android:layout_alignParentRight="true"
+                android:src="@drawable/more"
+                android:scaleType="centerInside"
+                style="?android:attr/borderlessButtonStyle"/>
+        </RelativeLayout>
     </RelativeLayout>
-</FrameLayout>
+</LinearLayout>

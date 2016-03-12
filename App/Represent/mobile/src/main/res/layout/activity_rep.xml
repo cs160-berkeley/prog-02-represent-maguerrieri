@@ -8,18 +8,24 @@
     android:layout_height="match_parent"
     android:id="@+id/content_rep">
 
-    <FrameLayout
-        android:id="@+id/rep_info_frame"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:elevation="4dp"
-        app:behavior_peekHeight="200dp"
-        app:layout_behavior="android.support.design.widget.BottomSheetBehavior">
+    <!--<include layout="@layout/rep_tile"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_width="match_parent"/>-->
+
+    <!--<FrameLayout-->
+        <!--android:id="@+id/rep_info_frame"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:elevation="4dp"-->
+        <!--app:behavior_peekHeight="200dp"-->
+        <!--app:layout_behavior="android.support.design.widget.BottomSheetBehavior">-->
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/rep_info_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@android:color/white"/>
-    </FrameLayout>
+            android:background="@android:color/white"
+            android:paddingTop="8dp"
+            android:clipToPadding="false"/>
+    <!--</FrameLayout>-->
 </android.support.design.widget.CoordinatorLayout>

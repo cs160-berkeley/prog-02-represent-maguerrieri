@@ -24,7 +24,7 @@ public class PhoneListenerService extends WearableListenerService {
         String path = messageEvent.getPath();
         if (path.equalsIgnoreCase(this.getString(R.string.rep_changed_path))) {
             Intent startRep = new Intent(this.getString(R.string.rep_changed_action))
-                    .putExtra("ind", Integer.valueOf(new String(messageEvent.getData())))
+                    .putExtra("rep", new String(messageEvent.getData()))
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             LocalBroadcastManager.getInstance(this).sendBroadcast(startRep);
         } else if (path.equalsIgnoreCase(this.getString(R.string.rep_random_path))) {
