@@ -1,8 +1,12 @@
 ## CS 160
 # PROG 2A: Represent! wireframes
-![wireframes](./wireframes.png)\ 
+![main](./screenshots/main.png)\
+![list](./screenshots/list.png)\
+![detail](./screenshots/detail.png)\
+![presidential](./screenshots/pres.png)\
+![watch detail](./screenshots/watch_detail.png)\ 
 
 ### Links
-[Emulator proof video](https://www.youtube.com/watch?v=TqVKh1CSycg)
+[Demo video](https://youtu.be/qoJdMNw2Fdg)
 
-[Figma document](https://www.figma.com/file/ojNP9lGCs1TvnIGs9aw4t2/Represent)
+[GitHub repository](https://github.com/cs160-sp16/prog-01-crunch-time-maguerrieri)
