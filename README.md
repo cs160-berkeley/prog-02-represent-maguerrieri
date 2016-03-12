@@ -1,5 +1,5 @@
 ## CS 160
-# PROG 2A: Represent! wireframes
+# PROG 2: Represent!
 ![main](./screenshots/main.png)\
 ![list](./screenshots/list.png)\
 ![detail](./screenshots/detail.png)\
