@@ -1,10 +1,11 @@
+![Just one of the many things that make you SPECIAL](./fallout-charisma.png)
 ## CS 160
 # PROG 2: Represent!
-![main](./screenshots/main.png)\
-![list](./screenshots/list.png)\
-![detail](./screenshots/detail.png)\
-![presidential](./screenshots/pres.png)\
-![watch detail](./screenshots/watch_detail.png)\ 
+![main](./screenshots/main.png)
+![list](./screenshots/list.png)
+![detail](./screenshots/detail.png)
+![presidential](./screenshots/pres.png)
+![watch detail](./screenshots/watch_detail.png)
 
 ### Links
 [Demo video](https://youtu.be/qoJdMNw2Fdg)
